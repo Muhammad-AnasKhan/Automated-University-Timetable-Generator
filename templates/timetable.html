@@ -1,0 +1,108 @@
+{% extends 'base.html' %} {% block content %} {% load static %} {% load index %}
+<style>
+  @media print {
+    /* Set the page size to landscape */
+    @page {
+      size: landscape;
+    }
+    /* Apply page break before and after the element with class "page-break" */
+    table {
+      page-break-after: always;
+    }
+      button{
+  display:none !important;
+  }
+  }
+</style>
+<div style="/*display: flex; flex-direction: column*/">
+
+  <button onclick="window.print()" class="accordion btn btn-dark px-5 py-3">Print</button>
+  <div>
+    {% for section in sections %}
+    <h2 class="secHead">{{ section.section_id }} ({{ section.department }})</h2>
+    <table class="timetable">
+      <thead>
+        <tr>
+          <th>Class #</th>
+          {% for time in timeSlots %}
+          <th>{{time.0}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for week in weekDays %}
+        <tr>
+          <th>{{week.0}}</th>
+          {% for time in timeSlots %}
+          <td>
+            {% sub schedule section.section_id week.0 time.0 %} {% comment %} {%
+            if class.section == section.section_id %} {% if class.meeting_time
+            == time.0 and class.day == week.0 %} {% comment %} {% if
+            class.meeting_time|split:"~"|index:2 == time.0 and
+            class.meeting_time|split:"~"|index:1 == week.0 %} endcomment %} {{
+            class.course }}<br />
+            {{ class.instructor }}<br />
+            {{ class.room }} {% endif %} {% endif %} {% endcomment %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endfor %}
+  </div>
+
+  
+  <h1>the second format testing</h1>
+  <hr />
+  
+  <div>
+    <h1>for section in sections</h1>
+    {% for section in sections %}
+      <h2 class="secHead">{{ section.section_id }} ({{ section.department }})</h2>
+      <h1>for week in weekDays</h1>
+      {% for week in weekDays %}
+
+      <h2>week.0: {{week.0}}</h2>
+      <h1>for time in timeSlots</h1>
+        {% for time in timeSlots %} 
+        {% for class in schedule %}
+
+        <h1>
+          {class.section: {{class.section}},
+          section.section_id:{{section.section_id}} }
+        </h1>
+        <h1>
+          {class.meeting_time : {{class.meeting_time }},week.0:{{week.0}},
+          time.0:{{time.0}} }
+        </h1>
+        class.course: {{ class.course }}<br />
+        class.instructor: {{ class.instructor }}<br />
+        class.room: {{ class.room }} 
+        {% endfor %} 
+        {% endfor %}
+      {% endfor %} 
+     {% endfor %}
+  </div>
+
+ <hr />
+  <h1>the 3rd format testing (previous templates)</h1>
+   <hr />
+ <h1>for section in sections</h1>
+    {% for section in sections %}
+   {% for class in schedule %}
+         if class.section({{class.section}}) == section.section_id({{section.section_id}})
+        {% if class.section == section.section_id %}
+        <tr>
+          <th>{{class.section_id}}</th>
+          <td>{{class.course}}</td>
+          <td>{{class.room}}</td>
+          <td>{{class.instructor}}</td>
+          <td>{{class.meeting_time}}</td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+      {% endfor %}
+</div>
+{% endblock %}
