@@ -1,4 +1,5 @@
 from django import template
+from django.utils.html import mark_safe
 register = template.Library()
 
 @register.filter
@@ -7,7 +8,17 @@ def dictKey(d, k):
 
     return ', '.join(d[k]) or ''
 
-
+"""
+<td>
+    <div style="margin-bottom: 0rem;text-align: center;">
+    ITEC-HCI HCI
+    </div>
+        
+    <div style="display: flex;justify-content: space-between;"> 
+    <span>c101</span><span>Ghulam Jillani</span> 
+    </div>
+</td>
+"""
 # sub schedule section.section_id week.0 time.0
 @register.simple_tag
 def sub(s, d, w, t):
@@ -15,7 +26,17 @@ def sub(s, d, w, t):
     for c in s:
         # if c.department.dept_name == d and c.meeting_time.day == w and c.meeting_time.time == t:
         if c.section == d and c.meeting_time.day == w and c.meeting_time.time == t:
-            return f'Room: {c.room} - {c.course.course_name} ({c.instructor.name})'
+            # return f'Room: {c.room} - {c.course.course_name} ({c.instructor.name})'
+            return mark_safe(f"""
+                        <div style="margin-bottom: 0rem;text-align: center;">
+                            {c.course.course_name} 
+                        </div>
+                            
+                        <div style="display: flex;justify-content: space-between;"> 
+                            <span>{c.room}</span>
+                            <span>{c.instructor.name}</span> 
+                        </div>
+                    """)
 
     return ''
 

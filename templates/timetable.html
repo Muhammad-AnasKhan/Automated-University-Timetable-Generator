@@ -2,62 +2,92 @@
 <style>
   @media print {
     /* Set the page size to landscape */
-    @page {
-      size: landscape;
-    }
-    /* Apply page break before and after the element with class "page-break" */
-    table {
-      page-break-after: always;
-    }
-      button{
-  display:none !important;
+      @page {
+        size: landscape;
+      }
+      /* Apply page break before and after the element with class "page-break" */
+      /* table */
+      .timetableClassContainer
+      {
+        page-break-after: always;
+      }
+        button{
+        display:none !important;
+      }
+      body{
+        font-size:.9rem;
+      }
   }
+  td{
+    border: 1px solid black;
   }
 </style>
 <div style="/*display: flex; flex-direction: column*/">
 
-  <button onclick="window.print()" class="accordion btn btn-dark px-5 py-3">Print</button>
-  <div>
+  <button onclick="window.print()" class="accordion btn btn-dark px-5 py-3 mb-3">Print</button>
+  <div id="mainDiv">
     {% for section in sections %}
-    <h2 class="secHead">{{ section.section_id }} ({{ section.department }})</h2>
-    <table class="timetable">
-      <thead>
-        <tr>
-          <th>Class #</th>
-          {% for time in timeSlots %}
-          <th>{{time.0}}</th>
-          {% endfor %}
-        </tr>
-      </thead>
 
-      <tbody>
-        {% for week in weekDays %}
-        <tr>
-          <th>{{week.0}}</th>
-          {% for time in timeSlots %}
-          <td>
-            {% sub schedule section.section_id week.0 time.0 %} {% comment %} {%
-            if class.section == section.section_id %} {% if class.meeting_time
-            == time.0 and class.day == week.0 %} {% comment %} {% if
-            class.meeting_time|split:"~"|index:2 == time.0 and
-            class.meeting_time|split:"~"|index:1 == week.0 %} endcomment %} {{
-            class.course }}<br />
-            {{ class.instructor }}<br />
-            {{ class.room }} {% endif %} {% endif %} {% endcomment %}
-          </td>
+    <div class="timetableClassContainer">
+      <div class="d-flex" style=""> 
+        <img style="max-width:10%" src="https://www.lsm.edu.pk/static/media/uoe.fcfdb661.png">
+        <div class="my-auto w-100">
+          <h1 class="text-center"> University of Education Lahore Multan Campus</h1>
+          <h2 class="secHead text-center">{{ section.section_id }} ({{ section.department }})</h2>
+        </div>
+      </div>
+
+      {% comment %} <h2 class="secHead">{{ section.section_id }} ({{ section.department }})</h2> {% endcomment %}
+
+      <table class="timetable">
+        <thead>
+          <tr>
+            {% comment %} <th>Class #</th> {% endcomment %}
+            <th></th>
+  
+  
+            {% for time in timeSlots %}
+            <th>{{time.0}}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+  
+        <tbody>
+          {% for week in weekDays %}
+          <tr>
+            <th>{{week.0}}</th>
+            {% for time in timeSlots %}
+            <td>
+
+              {% sub schedule section.section_id week.0 time.0 as subclass %}
+
+              {{ subclass|safe }}  
+
+              {% comment %} 
+                {% if class.section == section.section_id %} {% if class.meeting_time
+                == time.0 and class.day == week.0 %} {% comment %} {% if
+                class.meeting_time|split:"~"|index:2 == time.0 and
+                class.meeting_time|split:"~"|index:1 == week.0 %} endcomment %} {{
+                class.course }}<br />
+                {{ class.instructor }}<br />
+                {{ class.room }} {% endif %} {% endif %} 
+              {% endcomment %}
+            </td>
+            {% endfor %}
+          </tr>
           {% endfor %}
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
+
     {% endfor %}
   </div>
 
   
-  <h1>the second format testing</h1>
-  <hr />
+  {% comment %} <h1>the second format testing</h1>
+  <hr /> {% endcomment %}
   
-  <div>
+  {% comment %} <div>
     <h1>for section in sections</h1>
     {% for section in sections %}
       <h2 class="secHead">{{ section.section_id }} ({{ section.department }})</h2>
@@ -84,14 +114,15 @@
         {% endfor %}
       {% endfor %} 
      {% endfor %}
-  </div>
+  </div> {% endcomment %}
 
+{% comment %} 
  <hr />
   <h1>the 3rd format testing (previous templates)</h1>
    <hr />
  <h1>for section in sections</h1>
     {% for section in sections %}
-   {% for class in schedule %}
+    {% for class in schedule %}
          if class.section({{class.section}}) == section.section_id({{section.section_id}})
         {% if class.section == section.section_id %}
         <tr>
@@ -104,5 +135,8 @@
         {% endif %}
       {% endfor %}
       {% endfor %}
-</div>
+
+
+    </div> {% endcomment %}
+
 {% endblock %}
