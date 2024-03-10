@@ -17,6 +17,8 @@ TOURNAMENT_SELECTION_SIZE = 8
 MUTATION_RATE = 0.05
 VARS = {"generationNum": 0, "terminateGens": False}
 
+GENERATION_SIZE = 1
+
 
 class Data:
     def __init__(self):
@@ -281,6 +283,8 @@ def apiterminateGens(request):
 
 @login_required
 def timetable(request):
+    # if VARS["generationNum"] > 0:
+    #     apiterminateGens(request)  # terminate generation process, if happening
     global data
     data = Data()
     population = Population(POPULATION_SIZE)
@@ -290,7 +294,8 @@ def timetable(request):
     geneticAlgorithm = GeneticAlgorithm()
     schedule = population.getSchedules()[0]
 
-    while (schedule.getFitness() != 1.0) and (VARS["generationNum"] < 100):
+    # while (schedule.getFitness() != 1.0) and (VARS["generationNum"] < 100):
+    while (schedule.getFitness() != 1.0) and (VARS["generationNum"] < GENERATION_SIZE):
         if VARS["terminateGens"]:
             return HttpResponse("")
 
@@ -361,6 +366,8 @@ Page Views
 
 
 def home(request):
+    if VARS["generationNum"] > 0:
+        apiterminateGens(request)  # terminate generation process, if happening
     return render(request, "index.html", {})
 
 

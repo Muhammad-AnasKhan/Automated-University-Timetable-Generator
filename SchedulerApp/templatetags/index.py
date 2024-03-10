@@ -27,18 +27,72 @@ def sub(s, d, w, t):
         # if c.department.dept_name == d and c.meeting_time.day == w and c.meeting_time.time == t:
         if c.section == d and c.meeting_time.day == w and c.meeting_time.time == t:
             # return f'Room: {c.room} - {c.course.course_name} ({c.instructor.name})'
-            return mark_safe(f"""
+            return mark_safe(
+                f"""
                         <div style="margin-bottom: 0rem;text-align: center;">
-                            {c.course.course_name} 
+                            <input class='input' value='{c.course.course_name}' readonly/> 
                         </div>
                             
                         <div style="display: flex;justify-content: space-between;"> 
+                            <span>
+                                <input class='input' value='{c.room}' readonly/> 
+                            </span>
+                            <span>
+                                <input class="instructor-name input"  style="text-align: right;" value='{c.instructor.name}' readonly/>
+                            </span> 
+                        </div>
+                    """
+            )
+
+    return ''
+
+
+@register.simple_tag
+def sub_teacher(s, d, w, t):
+    """Returns the subject-teacher for a department, weekday and time period"""
+    for c in s:
+        if (
+            c.instructor == d
+            and c.meeting_time.day == w
+            and c.meeting_time.time == t
+        ):
+            return mark_safe(
+                f"""
+                        <div>
+                            {c.course.course_name} 
+                        </div>
+                            
+                        <div> 
                             <span>{c.room}</span>
                             <span>{c.instructor.name}</span> 
                         </div>
-                    """)
+                    """
+            )
+    return ""
 
-    return ''
+
+# @register.simple_tag
+# def sub_teacher(s, teacher_id, w, t):
+#     """Returns the subject-course for a teacher, weekday, and time period"""
+#     for c in s:
+#         if (
+#             c.instructor.id == teacher_id
+#             and c.meeting_time.day == w
+#             and c.meeting_time.time == t
+#         ):
+#             return mark_safe(
+#                 f"""
+#                         <div style="margin-bottom: 0rem;text-align: center;">
+#                             {c.course.course_name}
+#                         </div>
+#                         <div style="display: flex;justify-content: space-between;">
+#                             <span>{c.room}</span>
+#                             <span>{c.section.section_id} ({c.section.department})</span>
+#                         </div>
+#                     """
+#             )
+#     return ""
+
 
 @register.tag
 def active(parser, token):

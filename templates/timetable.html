@@ -1,77 +1,109 @@
 {% extends 'base.html' %} {% block content %} {% load static %} {% load index %}
 <style>
-  @media print {
-    /* Set the page size to landscape */
-      @page {
-        size: landscape;
-      }
-      /* Apply page break before and after the element with class "page-break" */
-      /* table */
-      .timetableClassContainer
-      {
-        page-break-after: always;
-      }
-        button{
-        display:none !important;
-      }
-      body{
-        font-size:.9rem;
-      }
+  /* Set the page size to landscape */
+  @page {
+    size: landscape;
   }
-  td{
+
+  @media print {
+
+    html,
+    body {
+      size: A4 landscape;
+    }
+
+    /* Apply page break before and after the element with class "page-break" */
+    /* table */
+    .timetableClassContainer {
+      page-break-after: always;
+    }
+
+    nav,
+    button {
+      display: none !important;
+    }
+
+    .no-print {
+      display: none !important;
+    }
+
+    body {
+      font-size: 0.9rem;
+    }
+  }
+
+  td {
     border: 1px solid black;
   }
-</style>
-<div style="/*display: flex; flex-direction: column*/">
 
-  <button onclick="window.print()" class="accordion btn btn-dark px-5 py-3 mb-3">Print</button>
+  .input {
+    background: transparent;
+    border: none;
+    outline: none;
+  }
+
+  .no-print > * {
+    font-size: 1.3rem;
+  }
+</style>
+<div style=" /*display: flex; flex-direction: column*/">
+  <div class="d-flex no-print p-5 mb-2 pt-0 align-items-baseline">
+
+    <button onclick="window.print()" class="accordion btn btn-dark px-5 py-3 mb-3">
+      Print
+    </button>
+    <div class="ms-4">
+
+      <input type="checkbox" onchange="toggleTimetableEditability(this)" name="isTimetableEditable"
+        id="isTimetableEditable">
+      <label for="isTimetableEditable">Make editable</label>
+
+    </div>
+  </div>
   <div id="mainDiv">
     {% for section in sections %}
 
     <div class="timetableClassContainer">
-      <div class="d-flex" style=""> 
-        <img style="max-width:10%" src="https://www.lsm.edu.pk/static/media/uoe.fcfdb661.png">
+      <div class="d-flex" style="">
+        <img style="max-width: 10%" src="https://www.lsm.edu.pk/static/media/uoe.fcfdb661.png" />
         <div class="my-auto w-100">
-          <h1 class="text-center"> University of Education Lahore Multan Campus</h1>
-          <h2 class="secHead text-center">{{ section.section_id }} ({{ section.department }})</h2>
+          <h1 class="text-center">
+            University of Education Lahore Multan Campus
+          </h1>
+          <h2 class="secHead text-center">
+            {{ section.section_id }} ({{ section.department }})
+          </h2>
         </div>
       </div>
 
-      {% comment %} <h2 class="secHead">{{ section.section_id }} ({{ section.department }})</h2> {% endcomment %}
+      {% comment %}
+      <h2 class="secHead">
+        {{ section.section_id }} ({{ section.department }})
+      </h2>
+      {% endcomment %}
 
       <table class="timetable">
         <thead>
           <tr>
-            {% comment %} <th>Class #</th> {% endcomment %}
+            {% comment %}
+            <th>Class #</th>
+            {% endcomment %}
             <th></th>
-  
-  
+
             {% for time in timeSlots %}
             <th>{{time.0}}</th>
             {% endfor %}
           </tr>
         </thead>
-  
+
         <tbody>
           {% for week in weekDays %}
           <tr>
             <th>{{week.0}}</th>
             {% for time in timeSlots %}
             <td>
-
               {% sub schedule section.section_id week.0 time.0 as subclass %}
-
-              {{ subclass|safe }}  
-
-              {% comment %} 
-                {% if class.section == section.section_id %} {% if class.meeting_time
-                == time.0 and class.day == week.0 %} {% comment %} {% if
-                class.meeting_time|split:"~"|index:2 == time.0 and
-                class.meeting_time|split:"~"|index:1 == week.0 %} endcomment %} {{
-                class.course }}<br />
-                {{ class.instructor }}<br />
-                {{ class.room }} {% endif %} {% endif %} 
-              {% endcomment %}
+              {{subclass|safe }}
             </td>
             {% endfor %}
           </tr>
@@ -81,62 +113,149 @@
     </div>
 
     {% endfor %}
+    <!-- Add a container for the teacher-wise timetable -->
+    <div class="timetableTeacherContainer">
+      {% comment %} {% for teacher in teachers %} {% endcomment %}
+      {% for teacher in schedule.instructor %}
+      <div class="timetableClassContainer">
+        <div class="d-flex" style="">
+          <img style="max-width: 10%" src="..." />
+          <div class="my-auto w-100">
+            <h1 class="text-center">Teacher</h1>
+            <h2 class="secHead text-center">{{ teacher.name }}</h2>
+          </div>
+        </div>
+        <table class="timetable">
+          <thead>
+            <tr>
+              <th></th>
+              {% for time in timeSlots %}
+              <th>{{ time.0 }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for week in weekDays %}
+            <tr>
+              <th>{{ week.0 }}</th>
+              {% for time in timeSlots %}
+              <td>
+                {% sub_teacher schedule teacher.name week.0 time.0 as subclass %} {{
+                subclass|safe }}
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+    </div>
   </div>
 
-  
-  {% comment %} <h1>the second format testing</h1>
-  <hr /> {% endcomment %}
-  
-  {% comment %} <div>
+  {% comment %}
+  <h1>the second format testing</h1>
+  <hr />
+  {% endcomment %} {% comment %}
+  <div>
     <h1>for section in sections</h1>
     {% for section in sections %}
-      <h2 class="secHead">{{ section.section_id }} ({{ section.department }})</h2>
-      <h1>for week in weekDays</h1>
-      {% for week in weekDays %}
+    <h2 class="secHead">{{ section.section_id }} ({{ section.department }})</h2>
+    <h1>for week in weekDays</h1>
+    {% for week in weekDays %}
 
-      <h2>week.0: {{week.0}}</h2>
-      <h1>for time in timeSlots</h1>
-        {% for time in timeSlots %} 
-        {% for class in schedule %}
+    <h2>week.0: {{week.0}}</h2>
+    <h1>for time in timeSlots</h1>
+    {% for time in timeSlots %} {% for class in schedule %}
 
-        <h1>
-          {class.section: {{class.section}},
-          section.section_id:{{section.section_id}} }
-        </h1>
-        <h1>
-          {class.meeting_time : {{class.meeting_time }},week.0:{{week.0}},
-          time.0:{{time.0}} }
-        </h1>
-        class.course: {{ class.course }}<br />
-        class.instructor: {{ class.instructor }}<br />
-        class.room: {{ class.room }} 
-        {% endfor %} 
-        {% endfor %}
-      {% endfor %} 
-     {% endfor %}
-  </div> {% endcomment %}
-
-{% comment %} 
- <hr />
+    <h1>
+      {class.section: {{class.section}},
+      section.section_id:{{section.section_id}} }
+    </h1>
+    <h1>
+      {class.meeting_time : {{class.meeting_time }},week.0:{{week.0}},
+      time.0:{{time.0}} }
+    </h1>
+    class.course: {{ class.course }}<br />
+    class.instructor: {{ class.instructor }}<br />
+    class.room: {{ class.room }} {% endfor %} {% endfor %} {% endfor %} {%
+    endfor %}
+  </div>
+  {% endcomment %} {% comment %}
+  <hr />
   <h1>the 3rd format testing (previous templates)</h1>
-   <hr />
- <h1>for section in sections</h1>
-    {% for section in sections %}
-    {% for class in schedule %}
-         if class.section({{class.section}}) == section.section_id({{section.section_id}})
-        {% if class.section == section.section_id %}
-        <tr>
-          <th>{{class.section_id}}</th>
-          <td>{{class.course}}</td>
-          <td>{{class.room}}</td>
-          <td>{{class.instructor}}</td>
-          <td>{{class.meeting_time}}</td>
-        </tr>
-        {% endif %}
-      {% endfor %}
-      {% endfor %}
+  <hr />
+  <h1>for section in sections</h1>
+  {% for section in sections %} {% for class in schedule %} if
+  class.section({{class.section}}) == section.section_id({{section.section_id}})
+  {% if class.section == section.section_id %}
+  <tr>
+    <th>{{class.section_id}}</th>
+    <td>{{class.course}}</td>
+    <td>{{class.room}}</td>
+    <td>{{class.instructor}}</td>
+    <td>{{class.meeting_time}}</td>
+  </tr>
+  {% endif %} {% endfor %} {% endfor %}
+</div>
+{% endcomment %}
 
+<script>
+  $(document).ready(function () {
+    // Call the setInputWidth function on document ready
+    adjustInputWidth();
 
-    </div> {% endcomment %}
+    // Attach an input event handler to all elements with the 'custom-input' class
+    $('.input').on('input', function () {
+      setInputWidth(this);
+    });
+  });
 
+  // Define the setInputWidth function
+  function setInputWidth(inputElement) {
+    const inputValue = inputElement.value;
+    const pixelsPerCharacter = 11; // Adjust this value based on the font and styling
+    const calculatedWidth = inputValue.length * pixelsPerCharacter;
+
+    // Use jQuery to set the width for the specific input element
+    $(inputElement).css('width', `${calculatedWidth}px`);
+  }
+
+  // Define a function to adjust input width on document ready
+  function adjustInputWidth() {
+    $('.input').each(function () {
+      setInputWidth(this);
+    });
+  }
+
+  const alignLeft = (list) => {
+    list.forEach((elem) => {
+      elem.style.textAlign = 'left'
+    })
+  }
+  const alignRight = (list) => {
+    list.forEach((elem) => {
+      elem.style.textAlign = 'right'
+    })
+  }
+  function toggleTimetableEditability(element) {
+    const input = document.querySelectorAll('input')
+    console.log(input)
+    console.log('element.checked', element.checked)
+    if (element.checked) {
+      alignLeft(document.querySelectorAll('.instructor-name'))
+      input.forEach((i) => {
+        i.classList.remove('input')
+        i.removeAttribute('readonly')
+      })
+    }
+    else {
+      alignRight(document.querySelectorAll('.instructor-name'))
+      input.forEach((i) => {
+        i.classList.add('input')
+        i.setAttribute('readonly', 'true')
+      })
+    }
+  }
+</script>
 {% endblock %}

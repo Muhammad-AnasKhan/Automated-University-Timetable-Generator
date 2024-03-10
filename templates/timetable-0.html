@@ -1,8 +1,4 @@
-{% extends 'base.html' %}
-{% block content %}
-{% load static %}
-{% load index %}
-
+{% extends 'base.html' %} {% block content %} {% load static %} {% load index %}
 
 <div>
   {% for section in sections %}
@@ -23,12 +19,67 @@
         <th>{{week.0}}</th>
         {% for time in timeSlots %}
         <td>{% sub schedule section.section_id week.0 time.0 %}</td>
-        {% endfor %}
+        {% comment %} {% if class.section == section.section_id %} {% if
+        class.meeting_time == time.0 and class.day == week.0 %} {% comment %} {%
+        if class.meeting_time|split:"~"|index:2 == time.0 and
+        class.meeting_time|split:"~"|index:1 == week.0 %} endcomment %} {{
+        class.course }}<br />
+        {{ class.instructor }}<br />
+        {{ class.room }} {% endif %} {% endif %} {% endcomment %} {% endfor %}
       </tr>
       {% endfor %}
     </tbody>
   </table>
   {% endfor %}
 </div>
+
+
+
+  {% comment %}
+  <h1>the second format testing</h1>
+  <hr />
+  {% endcomment %} {% comment %}
+  <div>
+    <h1>for section in sections</h1>
+    {% for section in sections %}
+    <h2 class="secHead">{{ section.section_id }} ({{ section.department }})</h2>
+    <h1>for week in weekDays</h1>
+    {% for week in weekDays %}
+
+    <h2>week.0: {{week.0}}</h2>
+    <h1>for time in timeSlots</h1>
+    {% for time in timeSlots %} {% for class in schedule %}
+
+    <h1>
+      {class.section: {{class.section}},
+      section.section_id:{{section.section_id}} }
+    </h1>
+    <h1>
+      {class.meeting_time : {{class.meeting_time }},week.0:{{week.0}},
+      time.0:{{time.0}} }
+    </h1>
+    class.course: {{ class.course }}<br />
+    class.instructor: {{ class.instructor }}<br />
+    class.room: {{ class.room }} {% endfor %} {% endfor %} {% endfor %} {%
+    endfor %}
+  </div>
+  {% endcomment %} {% comment %}
+  <hr />
+  <h1>the 3rd format testing (previous templates)</h1>
+  <hr />
+  <h1>for section in sections</h1>
+  {% for section in sections %} {% for class in schedule %} if
+  class.section({{class.section}}) == section.section_id({{section.section_id}})
+  {% if class.section == section.section_id %}
+  <tr>
+    <th>{{class.section_id}}</th>
+    <td>{{class.course}}</td>
+    <td>{{class.room}}</td>
+    <td>{{class.instructor}}</td>
+    <td>{{class.meeting_time}}</td>
+  </tr>
+  {% endif %} {% endfor %} {% endfor %}
+</div>
+{% endcomment %} 
 
 {% endblock %}
