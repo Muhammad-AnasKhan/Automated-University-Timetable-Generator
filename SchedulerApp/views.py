@@ -1,14 +1,19 @@
+from django.contrib.auth.views import LoginView
+from django.db.models import Prefetch
 from django.http.response import HttpResponse
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.template.defaultfilters import stringfilter
+from django.views.decorators.csrf import csrf_exempt
 
+from .custom_decorators.index import teacher_required
 from .models import *
 from .forms import *
 from collections import defaultdict
 import random
 from django import template
+
 register = template.Library()
 
 POPULATION_SIZE = 30
@@ -47,6 +52,7 @@ class Data:
     def get_sections(self):
         return self._sections
 
+
 class Schedule:
     def __init__(self):
         self._data = data
@@ -83,22 +89,49 @@ class Schedule:
         self._classes.append(newClass)
 
     def initialize(self):
-        sections = Section.objects.all()
-        for section in sections:
-            dept = section.department
-            n = section.num_class_in_week
+        # sections = Section.objects.all()
+        # for section in sections:
+        #     dept = section.department
+        #     # n = section.num_class_in_week
 
-            if n > len(data.get_meetingTimes()):
-                n = len(data.get_meetingTimes())
+        #     # if n > len(data.get_meetingTimes()):
+        #     #     n = len(data.get_meetingTimes())
 
-            # courses = dept.courses.all()
-            courses = section.courses.all()
-            for course in courses:
-                for i in range(n // len(courses)):
-                    self.addCourse(data, course, courses, dept, section)
+        #     # courses = dept.courses.all()
+        #     courses = section.courses.all()
+        #     for course in courses:
+        #         # for i in range(n // len(courses)):
+        #         n = section.num_class_in_week # Use the num_class_in_week from the Course model
 
-            # for course in courses.order_by("?")[: (n % len(courses))]:
-            #     self.addCourse(data, course, courses, dept, section)
+        #         if n > len(data.get_meetingTimes()):
+        #             n = len(data.get_meetingTimes())
+
+        #         remaining_classes = n
+        #         while remaining_classes > 0:
+        #             self.addCourse(data, course, courses, dept, section)
+        #             remaining_classes -= 1
+
+        #     # for course in courses.order_by("?")[: (n % len(courses))]:
+        #     #     self.addCourse(data, course, courses, dept, section)
+
+        # print("--------------------Initial pop start--------------------")
+        # print(self)
+        # print("--------------------Initial pop ends--------------------")
+
+        # return self
+
+        for course in Course.objects.all():
+            n = (
+                course.num_class_in_week
+            )  # Get the total number of classes per week for this course
+            sections = (
+                course.section_set.all()
+            )  # Get all sections associated with this course
+
+            for section in sections:
+                dept = section.department
+                for i in range(n):
+                    self.addCourse(data, course, [course], dept, section)
 
         print("--------------------Initial pop start--------------------")
         print(self)
@@ -361,9 +394,33 @@ def testSplit(request):
     )
 
 """
+teacher_preferenced_timetable
+"""
+def generate_teacher_preferenced_timetable(request):
+    sections = Section.objects.prefetch_related(
+        Prefetch(
+            "teacherpreference_set",
+            queryset=TeacherPreference.objects.select_related(
+                "course", "timeslot", "teacher"
+            ),
+        )
+    )
+
+    context = {
+        "sections": sections,
+        "timeSlots": TIME_SLOTS,
+        "weekDays": DAYS_OF_WEEK,
+    }
+    return render(request, "preferencedTimetable.html", context)
+
+
+"""
 Page Views
 """
 
+def create_user(instructor_id):
+    CustomUser.objects.create(instructor_id=instructor_id)
+    pass
 
 def home(request):
     if VARS["generationNum"] > 0:
@@ -376,7 +433,19 @@ def instructorAdd(request):
     form = InstructorForm(request.POST or None)
     if request.method == "POST":
         if form.is_valid():
-            form.save()
+            instance = form.save(commit=False)  # Save the form data to an instance without committing to the database yet
+            # Access the values of all fields
+            uid = form.cleaned_data['uid']
+            name = form.cleaned_data['name']
+
+            # Now you can use these values as needed
+
+            instance.save()  # Save the instance to the database
+
+            # If you want to access the auto-generated ID of the saved record
+            saved_instance_id = instance.id
+
+            # form.save()
             return redirect("instructorAdd")
     context = {"form": form}
     return render(request, "instructorAdd.html", context)
@@ -543,6 +612,104 @@ def sectionDelete(request, pk):
         sec.delete()
         return redirect("sectionEdit")
 
+
+"""
+Teacher_preference_module starts
+"""
+
+# def teacher_preference_view(request):
+#     if request.method == "POST":
+#         form = TeacherPreferenceForm(request.POST, request=request)
+#         if form.is_valid():
+#             form.save()
+#             return redirect("teacher_preference_success")
+#     else:
+#         form = TeacherPreferenceForm(request=request)
+#     return render(request, "teacherPreferenceForm.html", {"form": form})
+
+
+@teacher_required
+def teacher_preference_view(request):
+    context = {}
+    classes = Section.objects.values('section_id')
+    week_days = MeetingTime.objects.values_list('day', flat=True).distinct()
+    time_slots = MeetingTime.objects.values('pid', 'time').distinct()
+    context["classes"] = classes
+    context["week_days"] = week_days
+    # context['time_slots'] = time_slots
+    return render(request, "teacherPreferenceForm.html", context)
+
+
+def teacher_preference_success(request):
+    return render(request, "teacher_preference_success.html")
+
+@teacher_required
+def teacher_dashboard(request):
+    return render(request, "teacherDashboard.html")
+
+def save_teacher_preference(request):
+    try:
+        if request.method == "POST":
+            section_id = request.POST.get("section")
+            course_id = request.POST.get("course")
+            weekday = request.POST.get("weekday")
+            timeslot_id = request.POST.get("timeslot")
+            teacher_id = request.POST.get("teacher")
+
+            # Check if an entry already exists with the same weekday, section, and timeslot
+            existing_preference = TeacherPreference.objects.filter(
+                section_id=section_id,
+                # course_id=course_id,
+                weekday=weekday,
+                timeslot_id=timeslot_id
+            ).exists()
+
+            if not existing_preference:
+                # Create a new TeacherPreference object
+                teacher_preference = TeacherPreference.objects.create(
+                    section_id=section_id,
+                    course_id=course_id,
+                    weekday=weekday,
+                    timeslot_id=timeslot_id,
+                    teacher_id=teacher_id
+                )
+                return JsonResponse({"success": True, "message": "Teacher preference saved successfully."})
+            else:
+                return JsonResponse({"success": False, "message": "Teacher preference already exists."})
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)})
+
+@csrf_exempt
+def load_courses(request):
+    section_id = request.GET.get("section")
+    courses = Course.objects.filter(section__section_id=section_id).values('course_number', 'course_name')
+    return render(request, "course_options.html", {"courses": courses})
+
+# under construction
+def get_timeslots(request):
+    weekday = request.GET.get('weekday')
+    timeslots = MeetingTime.objects.filter(day=weekday).values('pid', 'time')
+
+    return render(request,'option_templates/timeslots_options.html', {'timeslots': timeslots})
+
+
+"""
+Users Pages
+"""
+def manage_users(request):
+    return render(request, 'users/manage_users.html')
+
+
+"""
+custom login view (inherited view from django builtin auth)
+"""
+class CustomLoginView(LoginView):
+    def get_success_url(self):
+        # if self.request.user.groups.filter(name='admin').exists():
+        if not self.request.user.is_teacher:
+            return '/'
+        else:
+            return '/teacher-dashboard/'
 
 """
 Error pages

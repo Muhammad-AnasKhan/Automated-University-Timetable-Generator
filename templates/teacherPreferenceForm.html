@@ -1,0 +1,150 @@
+{% extends 'base_templates/teacher_base_template.html' %} {% block content %}
+<form method="post" id="teacher-preference-form">
+  {% csrf_token %}
+  <fieldset>
+    <div class="tabcontent" id="new">
+      {# {{ form.as_p }}#}
+      <p>
+        <label for="id_section">Class:</label>
+        <select name="section" required="" id="id_section">
+          <option value="" selected="">---------</option>
+          {% for class in classes %}
+          <option value="{{ class.section_id }}">{{ class.section_id }}</option>
+          {{ class.section_id }} {% endfor %}
+        </select>
+      </p>
+      <p>
+        <label for="id_course">Course:</label>
+        <select name="course" required="" id="id_course">
+          <option value="" selected="">---------</option>
+        </select>
+      </p>
+      <p>
+        <label for="id_weekday">Weekday:</label>
+        <select name="weekday" required="" id="id_weekday">
+          <option value="" selected="">---------</option>
+          {% for day in week_days %}
+          <option value="{{ day }}">{{ day }}</option>
+          {% endfor %}
+        </select>
+      </p>
+      <p>
+        <label for="id_timeslot">Timeslot:</label>
+        <select name="timeslot" required="" id="id_timeslot">
+          <option value="" selected="">---------</option>
+          {# {% for t in time_slots %}#} 
+          <option value="{{ t.pid }}">{{ t.time }}</option>
+           {# {% endfor %}#}
+        </select>
+
+        <input type="hidden" value="" name="teacher" id="id_teacher" />
+      </p>
+
+      <button type="submit" class="mt-5 submit">Save</button>
+    </div>
+  </fieldset>
+</form>
+{% endblock %}
+
+<!-- JavaScript block -->
+{% block extra_js %} 
+
+<script>
+  $(document).ready(function () {
+      const showToast = (message, type='') => {
+          Toastify({
+              text: message,
+              duration: 30000,
+              {#close: true,#}
+              gravity: "top", // `top` or `bottom`
+              position: "center", // `left`, `center` or `right`
+              stopOnFocus: true, // Prevents dismissing of toast on hover
+              style: {
+                  background: "linear-gradient(to right, #00b09b, #458e8e9e)",
+              },
+              onClick: function () {
+              } // Callback after click
+          }).showToast();
+      }
+
+      $('#id_section').change(function () {
+          var sectionId = $(this).val();
+          $.ajax({
+              url: '{% url "load_courses" %}',
+              data: {
+                  'section': sectionId
+              },
+              success: function (data) {
+                  $('#id_course').html(data);
+              }
+          });
+      });
+
+      /*
+      $('#id_course').on('change', function () {
+          var courseId = $(this).val();
+          $.ajax({
+              url: '/get-timeslots/',
+              data: {
+                  'course_id': courseId
+              },
+              success: function (data) {
+                  $('#id_timeslot').html(data)
+              }
+          });
+      });*/
+
+      $('#id_weekday').on('change', function () {
+          var weekday = $(this).val();
+          $.ajax({
+              url: '{% url 'get_timeslots' %}',
+              data: {
+                  'weekday': weekday
+              },
+              success: function (data) {
+                  $('#id_timeslot').html(data)
+              }
+          });
+      });
+
+      $("#teacher-preference-form").submit(function (e) {
+          e.preventDefault()
+          var section = $("#id_section").val();
+          var course = $("#id_course").val();
+          var weekday = $("#id_weekday").val();
+          var timeslot = $("#id_timeslot").val();
+          var teacher = $("#id_teacher").val();
+
+          // Prepare data to send to the server
+          var data = {
+              section: section,
+              course: course,
+              weekday: weekday,
+              timeslot: timeslot,
+              teacher: teacher,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+          };
+          console.log('data', data)
+          // Send AJAX request to save teacher preference
+          $.ajax({
+              url: "{% url 'save_teacher_preference' %} ",
+              type: "POST",
+              data: data,
+              dataType: "json",
+              success: function (response) {
+                  if (response.success) {
+                      showToast(response.message);
+                      // You can perform additional actions here, such as refreshing the page
+                  } else {
+                      showToast(response.message);
+                  }
+              },
+              error: function (xhr, status, error) {
+                  showToast("An error occurred while saving teacher preference.");
+                  console.error(xhr.responseText);
+              }
+          });
+      });
+  });
+</script>
+{% endblock %}

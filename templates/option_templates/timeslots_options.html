@@ -1,0 +1,4 @@
+<option value="">Select a Timeslot</option>
+{% for t in timeslots %}
+    <option value="{{ t.pid }}">{{ t.time }} </option>
+{% endfor %}

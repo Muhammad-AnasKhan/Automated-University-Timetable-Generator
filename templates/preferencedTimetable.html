@@ -1,0 +1,166 @@
+{% extends 'base.html' %} {% block content %} {% load static %} {% load index %}
+<style>
+  /* Set the page size to landscape */
+  @page {
+    size: landscape;
+  }
+
+  @media print {
+    html,
+    body {
+      size: A4 landscape;
+    }
+
+    /* Apply page break before and after the element with class "page-break" */
+    /* table */
+    .timetableClassContainer {
+      page-break-after: always;
+    }
+
+    nav,
+    button {
+      display: none !important;
+    }
+
+    .no-print {
+      display: none !important;
+    }
+
+    body {
+      font-size: 0.9rem;
+    }
+  }
+
+  td {
+    border: 1px solid black;
+  }
+
+  .input {
+    background: transparent;
+    border: none;
+    outline: none;
+  }
+  .no-print > * {
+    font-size: 1.3rem;
+  }
+</style>
+<div id="mainDiv">
+    {% for section in sections %}
+    <div class="timetableClassContainer">
+        <div class="d-flex" style="">
+            <img style="max-width: 10%" src="https://www.lsm.edu.pk/static/media/uoe.fcfdb661.png" />
+            <div class="my-auto w-100">
+                <h1 class="text-center">
+                    University of Education Lahore Multan Campus
+                </h1>
+                <h2 class="secHead text-center">
+                    {{ section.section_id }} ({{ section.department }})
+                </h2>
+            </div>
+        </div>
+
+        <table class="timetable">
+            <thead>
+                <tr>
+                    <th></th>
+                    {% for time in timeSlots %}
+                    <th>{{ time.0 }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for week in weekDays %}
+                <tr>
+                    <th>{{ week.0 }}</th>
+                    {% for time in timeSlots %}
+                    <td>
+                        {% for preference in section.teacherpreference_set.all %}
+                            {% if preference.weekday == week.0 and preference.timeslot.time == time.0 %}
+                                <div style="margin-bottom: 0rem; text-align: center;">
+                                    <input class="input" value="{{ preference.course.course_name }}" readonly />
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>
+                                        <input class="input" value="" readonly />
+                                    </span>
+                                    <span>
+                                        <input class="instructor-name input" style="text-align: right;" value="{{ preference.teacher.name }}" readonly />
+                                    </span>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    /* ... (existing scripts) ... */
+</script>
+    
+    {#    script for timetable technical stuff #}
+    <script>
+  $(document).ready(function () {
+    // Call the setInputWidth function on document ready
+    adjustInputWidth();
+
+    // Attach an input event handler to all elements with the 'custom-input' class
+    $('.input').on('input', function () {
+      setInputWidth(this);
+    });
+  });
+
+  // Define the setInputWidth function
+  function setInputWidth(inputElement) {
+    const inputValue = inputElement.value;
+    const pixelsPerCharacter = 12; // Adjust this value based on the font and styling
+    const calculatedWidth = inputValue.length * pixelsPerCharacter;
+
+    // Use jQuery to set the width for the specific input element
+    $(inputElement).css('width', `${calculatedWidth}px`);
+  }
+
+  // Define a function to adjust input width on document ready
+  function adjustInputWidth() {
+    $('.input').each(function () {
+      setInputWidth(this);
+    });
+  }
+
+  const alignLeft = (list) => {
+    list.forEach((elem) => {
+      elem.style.textAlign = 'left'
+    })
+  }
+  const alignRight = (list) => {
+    list.forEach((elem) => {
+      elem.style.textAlign = 'right'
+    })
+  }
+  function toggleTimetableEditability(element) {
+    const input = document.querySelectorAll('input')
+    console.log(input)
+    console.log('element.checked', element.checked)
+    if (element.checked) {
+      alignLeft(document.querySelectorAll('.instructor-name'))
+      input.forEach((i) => {
+        i.classList.remove('input')
+        i.removeAttribute('readonly')
+      })
+    }
+    else {
+      alignRight(document.querySelectorAll('.instructor-name'))
+      input.forEach((i) => {
+        i.classList.add('input')
+        i.setAttribute('readonly', 'true')
+      })
+    }
+  }
+</script>
+{% endblock %}

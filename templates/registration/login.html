@@ -37,7 +37,7 @@
               <h4 class="logWelC">WELCOME TO </h4>
               <img class="logoLogin" src="{% static 'img/logo.png' %}">
               <h3 class="Alignment">
-                <center><strong>Automated University Timetable Generator</strong></center>
+                <center><strong>Automated University Timetable Scheduler</strong></center>
               </h3>
 
 
@@ -54,6 +54,7 @@
                 {{ form.password }}
                 <span class="glyphicon glyphicon-lock form-control-feedback"></span>
                 {% if form.errors %}
+                    <br>
                 <span class="lblnote">Invalid User Name Or Password.</span>
                 {% endif %}
               </div>
@@ -64,6 +65,14 @@
       </div>
     </div>
   </form>
+<script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+        inputs = document.querySelectorAll('input')
+        inputs.forEach(input => {
+            input.classList.add('form-control')
+        })
+    })
+</script>
 </body>
 
 </html>

@@ -6,7 +6,6 @@
   }
 
   @media print {
-
     html,
     body {
       size: A4 landscape;
@@ -113,44 +112,7 @@
     </div>
 
     {% endfor %}
-    <!-- Add a container for the teacher-wise timetable -->
-    <div class="timetableTeacherContainer">
-      {% comment %} {% for teacher in teachers %} {% endcomment %}
-      {% for teacher in schedule.instructor %}
-      <div class="timetableClassContainer">
-        <div class="d-flex" style="">
-          <img style="max-width: 10%" src="..." />
-          <div class="my-auto w-100">
-            <h1 class="text-center">Teacher</h1>
-            <h2 class="secHead text-center">{{ teacher.name }}</h2>
-          </div>
-        </div>
-        <table class="timetable">
-          <thead>
-            <tr>
-              <th></th>
-              {% for time in timeSlots %}
-              <th>{{ time.0 }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for week in weekDays %}
-            <tr>
-              <th>{{ week.0 }}</th>
-              {% for time in timeSlots %}
-              <td>
-                {% sub_teacher schedule teacher.name week.0 time.0 as subclass %} {{
-                subclass|safe }}
-              </td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% endfor %}
-    </div>
+   
   </div>
 
   {% comment %}
@@ -214,7 +176,7 @@
   // Define the setInputWidth function
   function setInputWidth(inputElement) {
     const inputValue = inputElement.value;
-    const pixelsPerCharacter = 11; // Adjust this value based on the font and styling
+    const pixelsPerCharacter = 12; // Adjust this value based on the font and styling
     const calculatedWidth = inputValue.length * pixelsPerCharacter;
 
     // Use jQuery to set the width for the specific input element
@@ -258,4 +220,5 @@
     }
   }
 </script>
+
 {% endblock %}

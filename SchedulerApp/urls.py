@@ -3,6 +3,7 @@ from .views import *
 
 urlpatterns = [
     path("", home, name="home"),
+    path('login/', CustomLoginView.as_view(), name='login'), # custom login view
     path("timetableGeneration/", timetable, name="timetable"),
     path("testSplit/", testSplit, name="testSplit"),
     path("instructorAdd/", instructorAdd, name="instructorAdd"),
@@ -25,4 +26,16 @@ urlpatterns = [
     path("sectionDelete/<str:pk>/", sectionDelete, name="deletesection"),
     path("api/genNum/", apiGenNum, name="apiGenNum"),
     path("api/terminateGens/", apiterminateGens, name="apiterminateGens"),
+
+    # teacher-preference module starts 
+    path('teacher-preference/', teacher_preference_view, name='teacher_preference'),
+    path('teacher-dashboard/', teacher_dashboard, name='teacher_dashboard'),
+    path('save_teacher_preference/', save_teacher_preference, name='save_teacher_preference'),
+    path('generate_teacher_preferenced_timetable/', generate_teacher_preferenced_timetable, name='generate_teacher_preferenced_timetable'),
+    path('teacher-preference/success/', teacher_preference_success, name='teacher_preference_success'),
+    path('load-courses/', load_courses, name='load_courses'),
+    path('get-timeslots/', get_timeslots, name='get_timeslots'),
+
+    # users module
+    path('users/', manage_users, name='manageUsers')
 ]

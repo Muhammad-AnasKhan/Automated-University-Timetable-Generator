@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db.models.signals import post_save, post_delete
 
 
@@ -11,6 +11,7 @@ TIME_SLOTS = (
     ("1:00 - 2:00", "1:00 - 2:00"),
     ("2:15 - 3:15", "2:15 - 3:15"),
 )
+# TIME_CHOICES = [(str(mt), str(mt)) for mt in MeetingTime.objects.all()]
 
 # TIME_SLOTS = (
 #     ('9:30 - 10:30', '9:30 - 10:30'),
@@ -50,23 +51,13 @@ class Instructor(models.Model):
 
 class MeetingTime(models.Model):
     pid = models.CharField(max_length=4, primary_key=True)
-    time = models.CharField(max_length=50, choices=TIME_SLOTS, default="11:30 - 12:30")
+    # time = models.CharField(max_length=50, choices=TIME_SLOTS, default="11:30 - 12:30")
+    time = models.CharField(max_length=50, choices=TIME_SLOTS)
     day = models.CharField(max_length=15, choices=DAYS_OF_WEEK)
 
     def __str__(self):
         # return f"{self.pid} {self.day} {self.time}"
         return f"{self.pid}~{self.day}~{self.time}"
-
-
-class Course(models.Model):
-    course_number = models.CharField(max_length=5, primary_key=True)
-    course_name = models.CharField(max_length=40)
-    max_numb_students = models.CharField(max_length=65)
-    instructors = models.ManyToManyField(Instructor)
-
-    def __str__(self):
-        return f"{self.course_number} {self.course_name}"
-
 
 class Department(models.Model):
     dept_name = models.CharField(max_length=50)
@@ -79,6 +70,17 @@ class Department(models.Model):
     def __str__(self):
         return self.dept_name
 
+
+class Course(models.Model):
+    course_number = models.CharField(max_length=5, primary_key=True)
+    course_name = models.CharField(max_length=40)
+    max_numb_students = models.CharField(max_length=65)
+    instructors = models.ManyToManyField(Instructor)
+
+    num_class_in_week = models.IntegerField(default=0) # num of classes in week per course
+
+    def __str__(self):
+        return f"{self.course_number} {self.course_name}"
 
 class Section(models.Model):
     section_id = models.CharField(max_length=25, primary_key=True)
@@ -115,6 +117,31 @@ class Section(models.Model):
         section.save()
 
 
+# Teacher preferences table
+class TeacherPreference(models.Model):
+    section = models.ForeignKey(Section, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    weekday = models.CharField(
+        max_length=10,
+        choices=[
+            ("Monday", "Monday"),
+            ("Tuesday", "Tuesday"),
+            ("Wednesday", "Wednesday"),
+            ("Thursday", "Thursday"),
+            ("Friday", "Friday")
+        ],
+    )
+    timeslot = models.ForeignKey(MeetingTime, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Instructor, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("section", "course", "weekday", "timeslot", "teacher")
+
+    def __str__(self):
+        # return f"{self.section.section_id} - {self.course.course_name} - {self.weekday} - {self.timeslot}"
+        return f"{self.timeslot}"
+
+
 """
 class Data(models.Manager):
     def __init__(self):
@@ -137,3 +164,13 @@ class Data(models.Manager):
     def get_numberOfClasses(self): return self._numberOfClasses
 
 """
+
+"""
+implementing customer user inheriting django authentication model
+"""
+class CustomUser(AbstractUser):
+    # Adding custom fields as needed
+    is_teacher = models.BooleanField(default=False)
+    instructor_id = models.BigIntegerField(default=0) # to keep instructor as user(common b/w user and instructor)
+    groups = models.ManyToManyField(Group, related_name='custom_users_groups')
+    user_permissions = models.ManyToManyField(Permission, related_name='custom_users_groups')

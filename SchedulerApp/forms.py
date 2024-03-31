@@ -46,15 +46,19 @@ class MeetingTimeForm(ModelForm):
             'pid': forms.TextInput(),
             'time': forms.Select(),
             'day': forms.Select(),
+        },
+        labels = {
+            "pid": "ID",
+            
         }
 
 
 class CourseForm(ModelForm):
     class Meta:
         model = Course
-        labels = {'max_numb_students': 'Maximum students'}
+        labels = {'max_numb_students': 'Maximum students',  'num_class_in_week': 'Total classes in a week'}
         fields = [
-            'course_number', 'course_name', 'max_numb_students', 'instructors'
+            'course_number', 'course_name', 'max_numb_students', 'instructors', 'num_class_in_week'
         ]
 
 
@@ -69,5 +73,44 @@ class DepartmentForm(ModelForm):
 class SectionForm(ModelForm):
     class Meta:
         model = Section
-        labels = {'num_class_in_week': 'Total classes in a week'}
-        fields = ['section_id', 'department', 'num_class_in_week', 'courses']
+        labels = {"section_id": "Class ID"}
+        # fields = ['section_id', 'department', 'num_class_in_week', 'courses']
+        fields = ['section_id', 'department', 'courses']
+
+"""
+Teacher_preference_module starts
+"""
+class TeacherPreferenceForm(forms.ModelForm):
+    class Meta:
+        model = TeacherPreference
+        fields = ["section", "course", "weekday", "timeslot", "teacher"]
+        widgets = {
+            "teacher": forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request", None)
+        super().__init__(*args, **kwargs)
+        self.fields["section"].queryset = Section.objects.all()
+        if self.request and self.request.user.is_authenticated:
+            self.fields["teacher"].initial = self.request.user
+
+        if "section" in self.data:
+            try:
+                section_id = int(self.data.get("section"))
+                self.fields["course"].queryset = Course.objects.filter(
+                    section__id=section_id
+                )
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk:
+            self.fields["course"].queryset = self.instance.section.courses.all()
+
+        if "course" in self.data:
+            try:
+                course_id = int(self.data.get("course"))
+                self.fields["timeslot"].queryset = MeetingTime.objects.all()
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk:
+            self.fields["timeslot"].queryset = MeetingTime.objects.all()

@@ -1,0 +1,35 @@
+{% extends 'base_templates/teacher_base_template.html' %}
+{% block content %}
+{% load static %}
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="{% static 'js/script.js' %}"></script>
+
+
+
+<div class="container-fluid">
+  <div class="d-flex flex-column  flex-md-row ml-auto">
+    <div class="col-12 col-md-6 d-flex justify-content-center">
+      <img class="w-50" src="{% static 'img/vect.jpg' %}">
+    </div>
+    <div class="col-12 col-md-6">
+      <div class="card p-5 p-md-0">
+        <div class="txt">
+          <h2>Timetable Scheduler</h2>
+          <p>Let our Artificial Intelligence schedule your classes.
+            Add your university class details and generate Time Table.</p>
+        </div>
+        <div class="crdbtn">
+          <a href="{% url 'teacher_preference' %}"  class="btn"
+            >Set Your Preferences</a>
+          
+          {% if not user.is_authenticated %}
+          <a href="{% url 'login' %}" class="btn">Login</a>
+          {% endif %}
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

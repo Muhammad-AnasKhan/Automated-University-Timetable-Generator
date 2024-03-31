@@ -122,3 +122,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = '/login/'
+# LOGOUT_URL = '/'
+
+# custom auth modal setup
+
+AUTH_USER_MODEL = 'SchedulerApp.CustomUser'

@@ -16,7 +16,7 @@
 }
 
 html {
-  font-size: 100%;
+  /*font-size: 100%;*/
   box-sizing: border-box;
   scroll-behavior: smooth;
 }
@@ -28,11 +28,12 @@ html {
 html, body {
   margin: 0;
   padding: 0;
-  width: 100vw;
+  /*width: 100vw;*/
   min-height: 100%;
   text-rendering: optimizeLegibility;
   font-family: "Quicksand", sans-serif;
-  font-size: 62.5%;
+  /*font-size: 62.5%;*/
+  font-size: 10px;
 }
 
 body {
@@ -593,4 +594,8 @@ fieldset {
   cursor: pointer;
   width: 2.6rem;
   height: 2.6rem;
+}
+
+select, input[type=text], input[type=number] {
+  width: 100% !important;
 }
