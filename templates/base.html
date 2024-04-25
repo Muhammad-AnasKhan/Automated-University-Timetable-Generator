@@ -16,10 +16,10 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Automated University Timetable Generator</title>
+    <title>Automated University Timetable Scheduler</title>
 
     <meta name="author" content="">
-    <meta name="description" content="Automated University Timetable Generator">
+    <meta name="description" content="Automated University Timetable Scheduler">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{% static 'img/logo.png' %}" type="image/x-icon">
 
@@ -54,7 +54,7 @@
                 <span class="line line3"></span>
             </div>
             <div class="logo">
-                <h2><a href="{{ home }}">Automated University Timetable Generator</a></h2>
+                <h2><a href="{{ home }}">Automated University Timetable Scheduler</a></h2>
                 <h4>Schedule Timetable with ease</h4>
             </div>
             <ul class="menu-items">
@@ -65,7 +65,7 @@
                 <li class="{% active request courseAdd %}"><a href="{{ courseAdd }}">Course</a></li>
                 <li class="{% active request departmentAdd %}"><a href="{{ departmentAdd }}">Department</a></li>
                 <li class="{% active request sectionAdd %}"><a href="{{ sectionAdd }}">Classes</a></li>
-                <li class="{% active request manageUsers %}"><a href="{{ manageUsers }}">Users</a></li>
+                {% comment %} <li class="{% active request manageUsers %}"><a href="{{ manageUsers }}">Users</a></li> {% endcomment %}
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'logout' %}"><i style="font-size:1.6rem" class="fa">&#xf08b;</i></a></li>
                 {% endif %}

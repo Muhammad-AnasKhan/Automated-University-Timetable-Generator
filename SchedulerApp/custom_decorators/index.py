@@ -16,6 +16,8 @@ def teacher_required(view_func):
             Using 'is_teacher' field directly to check if teacher, (CustomUser usage)
         '''
         if request.user.is_teacher:
+            request.session['instructor_id'] = request.user.instructor_id
+            request.session['username'] = request.user.username
             return view_func(request, *args, **kwargs)
         else:
             # return redirect('access_denied')  # Redirect to an appropriate page

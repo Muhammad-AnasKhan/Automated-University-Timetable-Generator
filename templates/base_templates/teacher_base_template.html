@@ -11,10 +11,10 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Automated University Timetable Generator</title>
+    <title>Automated University Timetable Scheduler</title>
 
     <meta name="author" content="">
-    <meta name="description" content="Automated University Timetable Generator">
+    <meta name="description" content="Automated University Timetable Scheduler">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{% static 'img/logo.png' %}" type="image/x-icon">
 
@@ -49,7 +49,7 @@
                 <span class="line line3"></span>
             </div>
             <div class="logo">
-                <h2><a href="{{ home }}">Automated University Timetable Generator</a></h2>
+                <h2><a href="{{ home }}">Automated University Timetable Scheduler</a></h2>
                 <h4>Schedule Timetable with ease</h4>
             </div>
             <ul class="menu-items">
@@ -59,6 +59,7 @@
             </ul>
             <ul class="menu-items">
                 {% if user.is_authenticated %}
+                    <li class="me-md-4"><a>{{request.session.username}} - {{request.session.instructor_id}}</a></li>
                     <li><a href="{% url 'logout' %}"><i style="font-size:1.6rem" class="fa">&#xf08b;</i></a></li>
                 {% endif %}
                 

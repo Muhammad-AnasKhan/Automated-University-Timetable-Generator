@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %} {% block content %} {% load static %} {% load index %}
 <style>
   /* Set the page size to landscape */
@@ -44,60 +45,75 @@
     font-size: 1.3rem;
   }
 </style>
-<div id="mainDiv">
-    {% for section in sections %}
-    <div class="timetableClassContainer">
-        <div class="d-flex" style="">
-            <img style="max-width: 10%" src="https://www.lsm.edu.pk/static/media/uoe.fcfdb661.png" />
-            <div class="my-auto w-100">
-                <h1 class="text-center">
-                    University of Education Lahore Multan Campus
-                </h1>
-                <h2 class="secHead text-center">
-                    {{ section.section_id }} ({{ section.department }})
-                </h2>
-            </div>
-        </div>
+<div>
+<div class="d-flex no-print p-5 mb-2 pt-0 align-items-baseline">
 
-        <table class="timetable">
-            <thead>
-                <tr>
-                    <th></th>
-                    {% for time in timeSlots %}
-                    <th>{{ time.0 }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
+    <button onclick="window.print()" class="accordion btn btn-dark px-5 py-3 mb-3">
+      Print
+    </button>
+    <div class="ms-4">
 
-            <tbody>
-                {% for week in weekDays %}
-                <tr>
-                    <th>{{ week.0 }}</th>
-                    {% for time in timeSlots %}
-                    <td>
-                        {% for preference in section.teacherpreference_set.all %}
-                            {% if preference.weekday == week.0 and preference.timeslot.time == time.0 %}
-                                <div style="margin-bottom: 0rem; text-align: center;">
-                                    <input class="input" value="{{ preference.course.course_name }}" readonly />
-                                </div>
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span>
-                                        <input class="input" value="" readonly />
-                                    </span>
-                                    <span>
-                                        <input class="instructor-name input" style="text-align: right;" value="{{ preference.teacher.name }}" readonly />
-                                    </span>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    </td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+      <input type="checkbox" onchange="toggleTimetableEditability(this)" name="isTimetableEditable"
+        id="isTimetableEditable">
+      <label for="isTimetableEditable">Make editable</label>
+
     </div>
-    {% endfor %}
+  </div>
+  <div id="mainDiv">
+      {% for section in sections %}
+      <div class="timetableClassContainer">
+          <div class="d-flex" style="">
+              <img style="max-width: 10%" src="https://www.lsm.edu.pk/static/media/uoe.fcfdb661.png" />
+              <div class="my-auto w-100">
+                  <h1 class="text-center">
+                      University of Education Lahore, Multan Campus
+                  </h1>
+                  <h1 class="secHead text-center">
+                      {{ section.section_id }} ({{ section.department }})
+                  </h1>
+              </div>
+          </div>
+  
+          <table class="timetable">
+              <thead>
+                  <tr>
+                      <th></th>
+                      {% for time in timeSlots %}
+                      <th>{{ time.0 }}</th>
+                      {% endfor %}
+                  </tr>
+              </thead>
+  
+              <tbody>
+                  {% for week in weekDays %}
+                  <tr>
+                      <th>{{ week.0 }}</th>
+                      {% for time in timeSlots %}
+                      <td>
+                          {% for preference in section.teacherpreference_set.all %}
+                              {% if preference.weekday == week.0 and preference.timeslot.time == time.0 %}
+                                  <div style="margin-bottom: 0rem; text-align: center;">
+                                      <input class="input" value="{{ preference.course.course_name }}" readonly />
+                                  </div>
+                                  <div style="display: flex; justify-content: space-between;">
+                                      <span>
+                                          <!-- <input class="input" value="" readonly /> -->
+                                      </span>
+                                      <span>
+                                          <input class="instructor-name input" style="text-align: right;" value="{{ preference.teacher.name }}" readonly />
+                                      </span>
+                                  </div>
+                              {% endif %}
+                          {% endfor %}
+                      </td>
+                      {% endfor %}
+                  </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+      </div>
+      {% endfor %}
+  </div>
 </div>
 
 <script>
@@ -119,7 +135,7 @@
   // Define the setInputWidth function
   function setInputWidth(inputElement) {
     const inputValue = inputElement.value;
-    const pixelsPerCharacter = 12; // Adjust this value based on the font and styling
+    const pixelsPerCharacter = 13; // Adjust this value based on the font and styling
     const calculatedWidth = inputValue.length * pixelsPerCharacter;
 
     // Use jQuery to set the width for the specific input element

@@ -70,6 +70,17 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
+    # "default": {
+    #     "ENGINE": "mssql",
+    #     "NAME": "TimeTable",
+    #     "USER": "me",
+    #     "PASSWORD": "me",
+    #     "HOST": "محمد\SQLEXPRESS",
+    #     # 'PORT': '',
+    #     "OPTIONS": {
+    #         "driver": "ODBC Driver 17 for SQL Server",
+    #     },
+    # },
 }
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 

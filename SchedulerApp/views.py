@@ -418,14 +418,17 @@ def generate_teacher_preferenced_timetable(request):
 Page Views
 """
 
-def create_user(instructor_id):
-    CustomUser.objects.create(instructor_id=instructor_id)
-    pass
-
 def home(request):
     if VARS["generationNum"] > 0:
         apiterminateGens(request)  # terminate generation process, if happening
     return render(request, "index.html", {})
+
+
+def create_instructor_user(instructor_id, uid):
+    new_user = CustomUser.objects.create_user(instructor_id=instructor_id, username=uid, is_teacher=True)
+    new_user.set_password('instructor')
+    new_user.save()
+    pass
 
 
 @login_required
@@ -436,16 +439,15 @@ def instructorAdd(request):
             instance = form.save(commit=False)  # Save the form data to an instance without committing to the database yet
             # Access the values of all fields
             uid = form.cleaned_data['uid']
-            name = form.cleaned_data['name']
+            username = form.cleaned_data['name']
 
             # Now you can use these values as needed
-
             instance.save()  # Save the instance to the database
 
             # If you want to access the auto-generated ID of the saved record
             saved_instance_id = instance.id
-
-            # form.save()
+            form.save()
+            create_instructor_user(saved_instance_id, username)
             return redirect("instructorAdd")
     context = {"form": form}
     return render(request, "instructorAdd.html", context)
@@ -631,11 +633,16 @@ Teacher_preference_module starts
 @teacher_required
 def teacher_preference_view(request):
     context = {}
+    instructor_id = request.session["instructor_id"]
     classes = Section.objects.values('section_id')
+    #
+    # courses = Course.objects.filter(instructors__id=instructor_id).values_list('course_number', flat=True)
+
     week_days = MeetingTime.objects.values_list('day', flat=True).distinct()
     time_slots = MeetingTime.objects.values('pid', 'time').distinct()
     context["classes"] = classes
     context["week_days"] = week_days
+    context["iid"] = instructor_id
     # context['time_slots'] = time_slots
     return render(request, "teacherPreferenceForm.html", context)
 
@@ -682,7 +689,13 @@ def save_teacher_preference(request):
 @csrf_exempt
 def load_courses(request):
     section_id = request.GET.get("section")
-    courses = Course.objects.filter(section__section_id=section_id).values('course_number', 'course_name')
+    # courses = Course.objects.filter(section__section_id=section_id).values('course_number', 'course_name')
+    iid = request.session['instructor_id']
+    courses = Course.objects.filter(
+        # section__instructor__id=iid,
+        section__section_id=section_id
+        ).distinct().values('course_number', 'course_name')
+
     return render(request, "course_options.html", {"courses": courses})
 
 # under construction
@@ -722,3 +735,7 @@ def error_404(request, exception):
 
 def error_500(request, *args, **argv):
     return render(request, "errors/500.html", {})
+
+
+def forgot_pass(request):
+    return  render(request, "registration/forgot_pass.html")

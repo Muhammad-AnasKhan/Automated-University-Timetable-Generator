@@ -48,7 +48,6 @@ class Instructor(models.Model):
     def __str__(self):
         return f"{self.uid} {self.name}"
 
-
 class MeetingTime(models.Model):
     pid = models.CharField(max_length=4, primary_key=True)
     # time = models.CharField(max_length=50, choices=TIME_SLOTS, default="11:30 - 12:30")
@@ -70,7 +69,6 @@ class Department(models.Model):
     def __str__(self):
         return self.dept_name
 
-
 class Course(models.Model):
     course_number = models.CharField(max_length=5, primary_key=True)
     course_name = models.CharField(max_length=40)
@@ -87,13 +85,11 @@ class Section(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE) # linking with departmant
     num_class_in_week = models.IntegerField(default=0)
     # course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True)
-    meeting_time = models.ForeignKey(
-        MeetingTime, on_delete=models.CASCADE, blank=True, null=True
-    )
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, blank=True, null=True)
-    instructor = models.ForeignKey(
-        Instructor, on_delete=models.CASCADE, blank=True, null=True
-    )
+    # meeting_time = models.ForeignKey(MeetingTime, on_delete=models.CASCADE, blank=True, null=True)
+    # room = models.ForeignKey(Room, on_delete=models.CASCADE, blank=True, null=True)
+    # instructor = models.ForeignKey(
+    #     Instructor, on_delete=models.CASCADE, blank=True, null=True
+    # )
 
     courses = models.ManyToManyField(Course)
 
